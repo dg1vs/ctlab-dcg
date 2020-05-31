@@ -1,0 +1,345 @@
+Changelog.txt 
+DCG2-C
+
+
+2020-0531 Karsten Schmidt
+- fork for private dev and for lcd 20x4
+
+2008-08-05 JCW
+
+- DUAL-DAC version from JCW, to handle a hardware option by piggypack pcb with two separate DACs LTC1655 for voltage and current
+  This is a compiler-option(!): -DDUAL_DAC
+
+2008-08-15 Paul Schmid
+
+new features:
+
+- added tracking function by menu. voltage and current values (either manually or online) are transferred to slave DCG.
+- added ripple functions by menu and by online parameters (including handling for DUAL-DAC option)
+
+dcg-parser.c
+- fixed: corrected command number 89 (was 80) of command dsp = set encoder step size
+
+encoder.c and dcg-panel.c
+- fixed: Encoder function changed to handle state machine completely in encoder.c, including Param.IncRast
+  to avoid non-ideal situation at the end-of-scale when encoder direction is changed, but no pulse issued.
+  This can happen, if the encoder is turned too fast for the software follow and EncPos center value is not 0 but e.g. -2
+
+dcg-panel.c
+- Added menus and display functions for Tracking, RippleHeight, RippleOn, RippleOff
+
+parser.c
+- fixed: variable names swapped for XOR command checksum
+- enhanced command parser (64 byte) overflow checking, added OVFL error
+  note: this is NOT the UART loop buffer (128bytes) in uart.c. overflows in uart.c are still unhandled (!)
+- added strict syntax checking (strongly recommended): format "1:.." mandatory to check if the data in the command buffer is really a command by syntax
+
+
+2008-09-02 Hartmut Birr
+
+- dcg.c: fixes for temperature measurement
+- dcg-panel.c: fixes for unbalanced acceleration of encoder
+
+
+2008-09-04 Paul Schmid
+
+- dcg-panel.c: improved panel handling for Ripple, RippleOn and RippleOff with ModifyPos
+- dcg-hw.asm.S: now using correct file and added fix for separated handling of DUAL_DAC
+- moved compiler-option now to config.h: #define DUAL_DAC
+- timer.c: included draft for handling voltage display in case of active Ripple mode
+
+
+2008-09-25 Paul Schmid
+
+- timer.c, dcg.c: fix: changed 4ms "Timer" to 2ms to handle more than just 25 commands on serial interface within 100ms
+  limiting factor was period of 4ms, in combination with 128 input buffer, and 100ms Period set in JLab
+- dcg-parser, dcg-panel and dcg.c; added: Power, AmpHour and WattHour measurement
+- dcg-panel: fixed: display conventions with solid and concave cursor in Ripple menus
+
+
+2008-09-29 Paul Schmid
+
+- dcg.c, parser.c, timer.c: changed the 4ms timer back to original version. Implemented idea from Hartmut:
+  if a command for another module or an answer is detected, no longer "break" the loop but "continue" in order to process more commands in one timer event.
+
+2009-01-12 Hartmut Birr
+
+-dcg-hw.c: corrected temperature calculation for negative (!) °C values. Was "overtemp" before ;-))
+
+
+*** 2009-03-29 Paul Schmid
+
+bugs, found during implementation of EDL2-firmware (derived from this DCG one)
+- strnlen of shortVersion, must be strnlen_P
+- Power is not continuously updated when selected on Panel
+- Modification of RIP, RON, ROF is not sent on bus when modified on panel
+- When encoder is pressed for long time, Mode=2 is not handled correctly in Power and AmpHour/WattHour display
+
+- migration to compiler 1.6.2 (20080610) is recommended with specially crafted compiler options to save memory
+- porting back codesaving implementations from EDL2 is recommended for:
+	- in dcg-panel.c generally
+	- in dcg.c for checklimits
+
+2009-05-22 Paul Schmid
+changed: compiler to compiler 1.6.2 (20080610), which is recommended with specially crafted compiler options to save memory
+added:  compiler options to save memory: 
+	-fno-inline-small-functions 
+	-fno-split-wide-types 
+	-fno-tree-scev-cprop 
+	-ffreestanding 
+	-ffunction-sections 
+	-mcall-prologues   
+	-fdata-sections          
+	above measures reduced program memory from 28166 bytes to 25920 bytes.
+	Data is 1182 bytes and E2 is 170 bytes
+
+changed: dcg.c checklimits to save another 250 bytes. 
+fixed:  strnlen of VersStrShort, must be strnlen_P
+fixed:  Power display is not continuously updated when selected on Panel
+fixed:  When encoder is pressed for long time, Mode=2 is not handled correctly in Power and AmpHour/WattHour display
+fixed:  Modification of RIP, RON, ROF is not sent on bus when modified on panel
+added:  3 User sets and startup set selection (port back from EDL2)
+started: porting back codesaving implementation in dcg-panel.c from EDL2
+fixed: default user Parmset after reset was displayed only
+changed: deserves now version 0.3 ;-)
+
+2009-05-24 Paul Schmid
+changed: error messages are now showing up in all menus, back port from EDL2
+changed: codesaving implementations from EDL2 is recommended for dcg-panel.c generally
+memory   consumption now: 25614 bytes (only!) including all above improvements.
+fixed:   error message handling with concave cursor still displayed.
+fixed:   code clean up for readablity
+
+
+22.06.2009 Paul Schmid
+- fixed:   Only pre-set user sets can be chosen for OnReset, not empty ones
+
+19.07.2009 Paul Schmid
+- changed: deactivated automatic resolution kickdown when reducing values. Feedback requested. 
+
+08.09.2009 Paul Schmid
+- new:     introduced dynamic/automatic increment selection for manual encoder after powerup. Copy from EDL2
+
+13.01.2010 Paul Schmid
+- fixed:   dcg-panel.c: Display content: Ripple mode is "Off" at 0% (was 100%)
+
+16.01.2010 Paul Schmid
+- adapted: switching of relays in Ripple mode. Now actually similar to Pascal-FW V2.91, with one modification (see ** line)
+	
+	Idea of switching the relay is basically:
+	- if not in current limitation mode and high output voltages: high input voltage
+	- if the >>measured<< voltage is below the switching limit (and a hysteresis), then switch to lower input voltage to avoid high power dissipation
+	- only if the overcurrent situation is removed, then it will be switched back to the higher input voltage.
+	  Note: this was different with the old implementation: The switch-back to the higher voltage would be done at any time the output voltage exeeds the threshold.
+
+	- if in ripple mode: the measured voltage can be lower, i.e. as low as set voltage minus ripple voltage, WITHOUT switching to the lower input voltage
+	- in DCG2 firmware, with high ripple time longer than 20ms, the high voltage can be reliably measured, so there would be no need to keep the input high
+	- however, below 20ms, the measured result is somehow unreliable and therefore the calculation with the ripple voltage is needed.
+
+	- (**) since in Ripple mode the Threshold is lower, the regular down-kick to the lower input voltage has to be handled separately. This is new in C-Firmware
+
+24.01.2010 Paul Schmid
+- introduced >experimental< arbitrary mode code
+	- parameter 182: 0= arbitrary off, 1= arbitrary >ROM< sequence on (overrides normal operation, including ripple mode)
+	- parameter 183: selects from predefined sequences in >ROM< (currently no user-definable sequences (tbd))
+	- parameter 184: repetition preselect: 0..254: number of repetions of the sequence, without delay. 255: continuous repetion of sequence
+			non-continuous sequence can be re-triggerd by sending parameter 184 again.
+	- tbd:	- Panel menu for these parameters.
+		- user definable RAM parameters
+
+- introduced bugfix for power on voltage peak, when Q3/Q5 (PC7) are switched on. For best results, an additional capacitor over R37 has to be considered. 
+
+Warning: This is experimental code! Use at your own risk. 
+The code has been roughly tested on a 16-bit Dual-DAC variant of DCG (without DCP)
+The code is experimental expecially in these respects:
+	- relay-switching for ripple mode
+	- arbitrary
+	- bugfix for power-on peak (software part only, of course ;-) )
+
+	- DCG 16-bit Standard-DAC (with/without DCP)
+	- DCG 12-bit (with/without DCP)
+
+	- no warranties - please give feedback!
+
+25.01.2010 Paul Schmid
+fixed problems found by Gerhard (gewo) Many thanks!
+- fixed:   not initialized "OnReset" parameter in EEPROM, 0xff instead of 0x00: (garbage on OnReset panel display)
+- fixed:   no range check on "OnReset" parameter
+- fixed:   now ignoring OnReset/ParamSet values on Bus commands if parameter set are empty
+- fixed:   Display of values "10,00 V" and "10,000 ". Reason was rounding of sprintf function which was not considered when caluclation digits of display
+           note: same fixes will apply to EDL2, too
+- fixed:   relay switching hysteresis bug under normal operation.
+
+11.02.2010 Paul Schmid
+- changed: Ripple-Variables are now handled atomic when being transferred to ISR
+- new:     panel menu system now supports sub-menues
+- changed: moved RippleOnRime and RippleOffTime to Submenu
+- added:   menu for Arbitray Parameters in Submenu
+- fixed:   update of RippleOnRime and RippleOffTime when being modified by Panel
+- fixed:   moved some constant strings to PROGMEM by PSTR()
+- changed: arbitrary sequences are no longer absolute values, but relative to voltage set and DCVoltMod
+
+13.02.2010 Paul Schmid
+- back-back-port ;-) from EDL2: introduced a memory-saving version for sub-menu system
+
+14.02.2010 Paul Schmid
+- changed: integrated again arbitrary sequences from RAM (fed by static parameters from ROM)
+- added:   automatic search in arbitrary RAM array to select on of multiple RAM sequences
+	   currently max sequence of 50 steps, RAM array can store 75 steps in total.
+- changed: Arbitrary Select Menu will now either select ROM or RAM sequence (stored in separate variables)
+- caution: still experimental code!
+
+15.12.2010 Paul Schmid
+- changed: moved ErrStr to PROGMEM, saves 14 bytes ROM and 130 bytes of RAM(!)
+- added:   bus parameters 186, 187 & 188 to handle arbitrary sequences from bus
+
+16.12.2010 Paul Schmid
+- changed: moved Mnemonics to PROGMEM, saves 178 bytes of RAM (!), at the cost of 24 bytes ROM
+- changed: arbitrary sequence command 188 needs WEN=1, to protect the system a little bit. (186+187 don't need wen=1)
+- note:    --> "memory issue stack overruns heap" should be fixed now with approx 340 bytes more RAM
+
+17.02.2010 Paul Schmid 
+- added:   store to and recall from EEPROM for arbitrary RAM mode
+- changed: changed Mnemonics implementation for array of structs to array of chars. Reduced waste of ROM for "char* PROGMEM" (with respect to EDL memory)
+- fixed:   peak at ArbSelect/ArbSelectRAM change (was when time values changed -on the fly- and free running time ticker was not reset in ISR)
+- cleanup: parts for arbitrary mode, for readability and peace of mind. ;-)
+- added:   bus parameter for ArbSelectRAM = Parameter 189
+- removed: already commentd out Arbitrary Mode for Current (implementation very unlikely due to low memory, maybe only reasonable with recoding of double parameters to uint16_t but with loss of precision)
+- added:   Mode Indicator for Ripple/Arbitrary in U/I display. Box and Character 'R' or 'A' (respectively) flashing
+
+18.02.2010 Paul Schmid 
+- added:   Delay parameter (0..30000ms) for Arbitrary Mode incl. bus parameter 185 and panel menu
+- changed: nice special display characters for Mode Indicator in U/I display.
+
+20.02.2010 Paul Schmid
+- changed: moved ucEncoderTableX to ROM (no side effects encountered this time, verified with same change in DDS-C. Moving these table to ROM had shown
+           some very strange behaviour: the value was decreased, when the encoder was turned very fast clockwise. To be verified ;-) )
+- fixed:   Mode indicator for Ripple is now switched off when RippleMod == 0
+- status:  jobEncoder() is called twice every 1ms, jobPanel() every 4ms. Therefore jobPanel() always eats away encoder increments as soon as they happen. 
+           => no chance to build up higher values to calculate some speed effects
+- changed: moved jobPanel() from 4ms timer to 50ms timer; seems to be enough. Reduced counter values in dcg-panel.c accordingly (750=>62, 200=>16, 100=>8) 
+           to show effectively the same behavior to the user. Buttons will now only be sampled once (1*50ms), as opposed to 7*4ms=28ms before. (2*50ms was too slow 
+           and affected user expericence) 
+           introduced EncDiffSpeed, which can be used for values with should benefit from dynamic encoder increments
+
+21.02.2010 Paul Schmid
+- fixed:   Relay switching problem in arbitrary mode above relay threshold.
+
+22.02.2010 Paul Schmid
+- changed: EEPROM initialisation sequence exchanged, so that Params.Initialized is written as the last one.
+- added:   LCD message "Init EEP" to show that the module is actually active... Writing the EEPROM takes more than 2 seconds (mostly due to Arbitray arrays)
+- fixed:   ArbTmr for StdArbitraryMode, when changing sequences or when running sequences with odd ms in total length.
+- fixed:   ArbDlyTimer for StdArbitraryMode
+
+23.02.2010 Paul Schmid 
+- fixed:   hang in arbitrary ISR, now break in while()
+- fixed:   ROM/RAM predefined Arbitrary sequences are now available in two flavors for std and DualDac-Hardware. 2ms steps strongly recommended for std. hardware.
+Thanks to gewo for his hints.
+
+25.02.2010 Paul Schmid
+- changed: voltage measuring logic for the ripple mode:
+		- if on/off period is below 3ms measure whatever you can, even if too late
+		- if on/off period is below Settletime, only make one measurement AT THE END of the period, when the voltage has settled best
+		- if on/off period is higher than settletime, wait until settletime for measuring rather stable values
+		Note: Reason for low settle time is high value of C11 (100nF) rather than C9
+- changed: indication for ripple voltage measurement in the panel: small "R" with top or bottom line
+- changed: indication for Arbitrary mode is an flashing/invertig small "A"
+
+26.02.2010 Paul Schmid
+- added:   alternating display of ripple current on the panel synchronous to ripple voltage
+- changed: Power value for Ripple mode is now calculated with actual current and voltage values, and the duty cycle parameters
+
+08.05.2010 Paul Schmid
+- added:   new bus parameters as of Pascal Firmware V2.92
+                 SubCh 16 integrated output voltage (3/4, Pascal 7/8)
+                 SubCh 17 integrated output current (3/4, Pascal 7/8)
+
+18.10.2010 Paul Schmid
+- changed: xMeanVoltage and xMeanCurrent now calculated with every cycle. (fix from somewhen in June 2010)
+
+17.05.2011 Paul Schmid
+- fixed:   return values for RAW20/21 (70/71): those are 16-bit uint18_t, but were printed as negative values on bus when >32768
+- prepared:VersStrLong as PROGMEM, but this solution uses 66 more bytes of code, for saving 24 bytes of RAM. not activated.
+- changed: Version to V	1.0. The code deserves it.
+
+08.01.2012 Paul Schmid
+- fixed: compatibility with new compilers "__DELAY_BACKWARD_COMPATIBLE__"
+- changed: move a char* to prog_char*
+
+2012-05-07 Paul Schmid
+           beautified code, no functional changes
+
+2012-05-15 Paul Schmid
+        - "const PROGMEM" for new compilers, no functional changes
+
+2012-07-16 Paul Schmid
+- replaced EEPROM default params by Code default values, with working options for 12bit and 16bit hardware
+
+2013-02-28 Paul Schmid
+- split loop in InitScales into two pieces (in order to compile with avr-gcc 4.7.2). Saves some bytes, too.
+- removed Variables LockRangeRippleOn/Off (unused)
+- avr-gcc 4.7.2 makes smaller code than good old WinAVR-20080610 (31118 -> 30056 byte NVM, at the price of 20 more bytes RAM). Very nice. 
+
+2014-03-06 Paul Schmid
+- some minor typos and fixes
+- added timer code to use crystals above 16MHz (up to 20MHz)
+
+2015-05-09 Paul Schmid
+- fixed: OPT17 = 167 / Bits 0+1 DAC16Present+ADC16Present:  Meaning was reverse. However, since normally both bits are the same value, no harm done.
+- added: OPT17 = 167 / BiT3 - "Suppress 'Fuseblow' message", e.g. in case HCP45 is connected (DCG input voltages can get very low even during normal operation)
+- fixed: [FUSE] is also indicated on the bus again (once per incident), not only at startup
+- changed the OVERVOLT / FUSEBLOWN fault conditions to make the fault indications a little more like the original Pascal version, but mechanics are a little different. 
+    Behavior is as follows:
+    - Overvolt condition is indicated if the output voltage is higher than input voltage minus 2V. Under that condition the relays are switched off until the condition is resolved.
+      The overvolt condition may be related to a broken Q12 transistor.
+    - Fuseblown condition is indicated if the input voltage is less than 7V. The fuseblow condition is indicative only, no relay switching is done.
+    - New: the fault condition that was detected first, takes precedence. 
+- note: Compiler avr-gcc 4.8.1 works just nice, about 90% memory usage
+
+2015-09-04 Paul Schmid
+- check-in as V1.1
+
+2016-01-26 Paul Schmid
+- added new Menu "Output On/Off". Idea from user "AwA".
+  Rotating Encoder left: Off right: On. If Encoder is pressed, Output On/Off is toggled and the Menu jumps back one step (displaying current value, Modify-Mode for Current suppressed)
+  New SubChannels:
+    - OUT = 30    : volatile Output On/Off
+    - OPT25 = 175 : non-volatile Output On/Off, status used at power-up
+  Note: New EEPROM parameter is added at the end, after the magic value. So no clearing of EEPROM necessary.
+
+- check-in as V1.2
+
+2016-08-13 Paul Schmid
+    - moved SubChannel OUT from 30 to 40 to have the same value in EDL, too   (volatile Output On/Off)
+    - added Tracking output to switch on/off the output of a second DCG
+
+*******************************
+todos:
+
+check for compatibility with avr-gcc 4.9.2 (removing patches for InitScales() )
+PROGMEM --> __flash
+
+improve cursor handling (absolute/relative increments)
+little bit more: code clean up for readablity
+Ripple Mode:
+- check with standard-DCG
+- check for short periods below 20ms
+- this mode creates more load on the main transistor (since input voltage will not be switched down for 2A version in the high range). 
+  Maybe add indication or Limitation of extra heat?
+....
+
+Ideas:
+*********************************
+bugs:
+- activate deactivation of Arbitrary mode while update of RAM sequence, or leave it as a feature? ;-)
+
+- WEN=1 => "P ramSet" (only seen once, very strange) ??? 
+- Ripple voltage measurements are NOT done alternatingly on high/low level in 12bit-mode.
+
+done:
+
+
+not fixable:
+- When in Current-RangeLock mode, the red LED will light when the wCurrent value is below 5% of the Range set. This is due to the behavior of the Current-compare circuit on the Bugfix2-board. 
+  It's not exactly clear whether the original hardware would have shown a different behavior... 
+  Consider it a feature rather than a bug: In the area below 10% and even more below 1% of the locked range the resolution will deteriorate - so this is an indication regarding this effect.
