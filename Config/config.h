@@ -48,11 +48,11 @@
 // *** version strings **********************************************************************************************
 // ******************************************************************************************************************
 
-#define VERSSTRLONG_DUAL    "1.2 [DCG2d by HB + PSC]"
-#define VERSSTRLONG_SINGLE  "1.2 [DCG2 by HB + PSC]"
+#define VERSSTRLONG_DUAL    "1.3 [DCG2d by HB + PSC]"
+#define VERSSTRLONG_SINGLE  "1.3 [DCG2 by HB + PSC]"
 
-#define VERSSTRSHORT_DUAL   "DCG2d1.2"
-#define VERSSTRSHORT_SINGLE "DCG2 1.2"
+#define VERSSTRSHORT_DUAL   "DCG2d1.3"
+#define VERSSTRSHORT_SINGLE "DCG2 1.3"
 
 // **********************************************************************************************
 
