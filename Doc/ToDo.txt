@@ -1,0 +1,1 @@
+errorCount auf uint8_t stellen, wenn erste Version fliegt
