@@ -139,10 +139,10 @@
     <Compile Include="Common\I2C.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Common\i2creg.c">
+    <Compile Include="Common\I2CRegister.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Common\i2creg.h">
+    <Compile Include="Common\I2CRegister.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Common\Lcd.c">

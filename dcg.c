@@ -34,7 +34,7 @@
 #include "Uart.h"
 #include "Parser.h"
 #include "timer.h"
-#include "i2creg.h"
+#include "I2CRegister.h"
 #include "Lcd.h"
 #include "encoder.h"
 #include "dcg.h"
@@ -161,9 +161,9 @@ const PROGMEM char VersStrShort_P[]= VERSSTRSHORT_SINGLE;
 
 const PROGMEM char InitEEPStr_P[]= "Init EEP";
 
-uint8_t SlaveCh;
+uint8_t g_ucSlaveCh;
 uint8_t TrackCh;
-uint16_t ErrCount;
+uint16_t g_ucErrCount;
 uint8_t ActivityTimer;
 uint8_t RangeI;
 uint8_t RangeU;
@@ -190,30 +190,30 @@ int16_t TmrRippleMod = 0;
 int16_t TmrRippleOn = 0;
 int16_t TmrRippleOff = 0;
 
-double Temperature;
-double DACLSBU[2];
-double ADCLSBU[2];
-double DACLSBI[4];
-double ADCLSBI[4];
-double PwrInFac;
-double xVoltage;
-double xVoltageLow;
-double xCurrent;
-double xCurrentLow;
-double xPower = 0.0;
-double xPowerTot = 0.0;
-double xAmpHours = 0.0;
-double xWattHours = 0.0;
+float Temperature;
+float DACLSBU[2];
+float ADCLSBU[2];
+float DACLSBI[4];
+float ADCLSBI[4];
+float PwrInFac;
+float xVoltage;
+float xVoltageLow;
+float xCurrent;
+float xCurrentLow;
+float xPower = 0.0;
+float xPowerTot = 0.0;
+float xAmpHours = 0.0;
+float xWattHours = 0.0;
 
-double xMeanVoltage = 0.0;
-double xMeanCurrent = 0.0;
+float xMeanVoltage = 0.0;
+float xMeanCurrent = 0.0;
 
-double DCVoltMod;
-double DCAmpMod;
+float DCVoltMod;
+float DCAmpMod;
 
-double wVoltage;
-double wCurrent;
-double RippleVoltage;
+float wVoltage;
+float wCurrent;
+float RippleVoltage;
 
 uint8_t ToggleDisplay = 0x00;
 uint8_t ActiveParamSet = 0;
@@ -237,7 +237,7 @@ uint8_t ArbRepeat = 0xff;   // for Parameter 184
 int16_t ArbDelay = 0;       // for Parameter 185
                             // 0 = off, 1..30000 in ms
 
-double ArbRAMtmpV = 0.0;    // for Parameter 186 = Loading Voltage values into array one-by-one
+float ArbRAMtmpV = 0.0;    // for Parameter 186 = Loading Voltage values into array one-by-one
 
 uint16_t ArbRAMtmpT = 0;    // for Parameter 187 = Loading Time values into array one-by-one
 
@@ -253,7 +253,7 @@ uint8_t ArbSelectRAM = 0;   // for Parameter 189
 
 uint8_t ArbRAMOffset = 0;   // Offset in RAM array, ArbRAMOffset = get_SequenceStart_RAMarray(&ArbSelectRAM); internally used only.
 
-double ArbMinVoltage = 0.0; // to calculate the voltage range for Arbitrary Mode with respect to relay switching; internally used only
+float ArbMinVoltage = 0.0; // to calculate the voltage range for Arbitrary Mode with respect to relay switching; internally used only
 
 //***********************************************************************************
 
@@ -272,28 +272,28 @@ int16_t  ArbDelayISR = 0;       // ISR value for ArbDelay
 #define ARBSEQUENCECOUNT 4
 
 const PROGMEM  char ArbL_ISO4[9]      = "ISO4    ";
-const PROGMEM double ArbV_ISO4[]      = {  1.0,  1.0,0.416667, 0.416667,   0.666667,  0.666667 ,1.0}; // ISO-4
+const PROGMEM float ArbV_ISO4[]      = {  1.0,  1.0,0.416667, 0.416667,   0.666667,  0.666667 ,1.0}; // ISO-4
 const PROGMEM uint16_t ArbTd_ISO4[]   = {  200,   20,   50,   10,   100,   20,    0};                 // Duration in ms
 
 const PROGMEM char ArbL_ISO4m[9]      = "ISO4m   ";
-const PROGMEM double ArbV_ISO4m[]     = {  1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // ISO-4 with modified shape
+const PROGMEM float ArbV_ISO4m[]     = {  1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // ISO-4 with modified shape
 
 const PROGMEM char ArbL_Graetz[9]     = "Graetz  ";
 #if defined DUAL_DAC && ! defined DEBUGSTDHW
-const PROGMEM double ArbV_Graetz[]    = { 1.0000, 0.9511, 0.8090, 0.5878, 0.3090, 0.0000, 0.3090, 0.5878, 0.8090, 0.9511, 1.0000};   // Steps in Volts // Sinus
+const PROGMEM float ArbV_Graetz[]    = { 1.0000, 0.9511, 0.8090, 0.5878, 0.3090, 0.0000, 0.3090, 0.5878, 0.8090, 0.9511, 1.0000};   // Steps in Volts // Sinus
 const PROGMEM uint16_t ArbTd_Graetz[] = { 1,       1,      1,      1,      1,      1,      1,      1,      1,      1,      0    };   // Duration in ms
 #else
-const PROGMEM double ArbV_Graetz[]    = { 1.0000, 0.5878, 0.0000,  0.5878, 1.0000, 1.0000};   // Steps in Volts // Sinus
+const PROGMEM float ArbV_Graetz[]    = { 1.0000, 0.5878, 0.0000,  0.5878, 1.0000, 1.0000};   // Steps in Volts // Sinus
 const PROGMEM uint16_t ArbTd_Graetz[] = { 2,       2,      2,      2,      2,       0    };   // Duration in ms
 #endif
 
 
 const PROGMEM char ArbL_3Peaks[9]     = "3Peaks  ";
 #if defined DUAL_DAC && ! defined DEBUGSTDHW
-const PROGMEM double ArbV_3Peaks[]    = { 1.0, 1.0,  0.416667,  1.0,  1.0,  0.666667 ,  1.0,  1.0,  0.833333 ,1.0}; // 3 Peaks down to 5V, 8V and 10V
+const PROGMEM float ArbV_3Peaks[]    = { 1.0, 1.0,  0.416667,  1.0,  1.0,  0.666667 ,  1.0,  1.0,  0.833333 ,1.0}; // 3 Peaks down to 5V, 8V and 10V
 const PROGMEM uint16_t ArbTd_3Peaks[] = { 200,   1,   1,         10,    1,     1,       10,    1,     1,       0};  // Duration in ms
 #else
-const PROGMEM double ArbV_3Peaks[]    = { 1.0, 1.0,  0.416667,  1.0,  1.0,  0.666667 , 1.0,  1.0,  0.833333 , 1.0, 1.0};  // 3 Peaks down to 5V, 8V and 10V
+const PROGMEM float ArbV_3Peaks[]    = { 1.0, 1.0,  0.416667,  1.0,  1.0,  0.666667 , 1.0,  1.0,  0.833333 , 1.0, 1.0};  // 3 Peaks down to 5V, 8V and 10V
 const PROGMEM uint16_t ArbTd_3Peaks[] = { 198,   2,   2,        8,    2,     2,       8,    2,     2,       2  , 0};    // Duration in ms
 #endif
 
@@ -305,7 +305,7 @@ const char PROGMEM* const PROGMEM ArbArrayL[ARBSEQUENCECOUNT] =
     ArbL_3Peaks
 };
 
-const double PROGMEM* const PROGMEM ArbArrayV[ARBSEQUENCECOUNT] =
+const float PROGMEM* const PROGMEM ArbArrayV[ARBSEQUENCECOUNT] =
 {
     ArbV_ISO4,
     ArbV_ISO4m,
@@ -324,24 +324,24 @@ const uint16_t PROGMEM* const PROGMEM ArbArrayT[ARBSEQUENCECOUNT] =
 
 
 //*** Arbitrary sequences in EEPROM (!) *********************************************
-double   ArbV_EEP[ARBINDEXMAXRAM]  EEMEM;
+float   ArbV_EEP[ARBINDEXMAXRAM]  EEMEM;
 uint16_t ArbT_EEP[ARBINDEXMAXRAM]  EEMEM;
 //***********************************************************************************
 
 
 //*** Arbitrary sequences in RAM (!) ************************************************
 //#define ARBINDEXMAXRAM  ==> moved to dcg.h
-double   ArbV_RAM[ARBINDEXMAXRAM];
+float   ArbV_RAM[ARBINDEXMAXRAM];
 uint16_t ArbT_RAM[ARBINDEXMAXRAM];
 
 #ifdef PRELOAD_ARB_RAM
 
 //*** predefined arbitrary sequences for RAM / for testing only ***
 #if defined DUAL_DAC && ! defined DEBUGSTDHW
-const PROGMEM double   ArbV_RAM_ROM[] = { 1.0, 1.0, 0.2, 0.4,  0.6,  0.5 , 1.0, 1.0000, 0.9511, 0.8090, 0.5878, 0.3090, 0.0000, 0.3090, 0.5878, 0.8090, 0.9511, 1.0000, 1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // Variant of ISO-4 + Graetz + ISO4
+const PROGMEM float   ArbV_RAM_ROM[] = { 1.0, 1.0, 0.2, 0.4,  0.6,  0.5 , 1.0, 1.0000, 0.9511, 0.8090, 0.5878, 0.3090, 0.0000, 0.3090, 0.5878, 0.8090, 0.9511, 1.0000, 1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // Variant of ISO-4 + Graetz + ISO4
 const PROGMEM uint16_t ArbT_RAM_ROM[] = { 200,  20,  50,  10,  100,   20,    0, 1,       1,      1,      1,      1,      1,      1,      1,      1,      1,      0,     200,    20,       50,     10,       100,     20,    0};   // Duration in ms
 #else
-const PROGMEM double   ArbV_RAM_ROM[] = { 1.0, 1.0, 0.2, 0.4,  0.6,  0.5 , 1.0, 1.0000, 0.5878, 0.0000,  0.5878, 1.0000, 1.0000, 1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // Variant of ISO-4 + Graetz + ISO4
+const PROGMEM float   ArbV_RAM_ROM[] = { 1.0, 1.0, 0.2, 0.4,  0.6,  0.5 , 1.0, 1.0000, 0.5878, 0.0000,  0.5878, 1.0000, 1.0000, 1.0,  0.916667 ,0.416667, 0.5,   0.666667,  0.75 ,1.0};   // Variant of ISO-4 + Graetz + ISO4
 const PROGMEM uint16_t ArbT_RAM_ROM[] = { 200,  20,  50,  10,  100,   20,    0, 2,       2,      2,      2,      2,       0,     200,    20,       50,     10,       100,     20,    0};   // Duration in ms
 
 #endif
@@ -426,8 +426,8 @@ void SaveUserParamSet(uint8_t set)
 {
     if (set >= USERSETS) return; // out of range
 
-    UserEepParamsTmp.InitVoltage = wVoltage;        //double
-    UserEepParamsTmp.InitCurrent = wCurrent;        //double
+    UserEepParamsTmp.InitVoltage = wVoltage;        //float
+    UserEepParamsTmp.InitCurrent = wCurrent;        //float
     UserEepParamsTmp.RippleOn = Params.RippleOn;    //word = uint16
     UserEepParamsTmp.RippleOff = Params.RippleOff;  //word = uint16
     UserEepParamsTmp.RippleMod = Params.RippleMod;  //word = uint16
@@ -451,8 +451,8 @@ uint8_t RecallUserParamSet(uint8_t set, uint8_t mode)
 
     if (mode == RECALL)
     {
-        wVoltage    = UserEepParamsTmp.InitVoltage;     //double
-        wCurrent    = UserEepParamsTmp.InitCurrent;     //double
+        wVoltage    = UserEepParamsTmp.InitVoltage;     //float
+        wCurrent    = UserEepParamsTmp.InitCurrent;     //float
         Params.RippleOn = UserEepParamsTmp.RippleOn;    //word = uint16
         Params.RippleOff = UserEepParamsTmp.RippleOff;  //word = uint16
         Params.RippleMod = UserEepParamsTmp.RippleMod;  //word = uint16
@@ -505,7 +505,7 @@ void PushParamSet(void)
 
 }
 
-void LIMIT_DOUBLE(double *param, double min, double max)
+void LIMIT_FLOAT(float *param, float min, float max)
 {
     if (*param > max)
         *param = max;
@@ -545,8 +545,8 @@ void CheckLimits(void)
     DPRINT(PSTR("wVoltage=%.5f wCurrent=%.5f\n"), wVoltage, wCurrent);
 
 
-    LIMIT_DOUBLE(&wVoltage, 0, (LockRangeU == 255) ? Params.MaxVoltage[1]:Params.MaxVoltage[LockRangeU]);
-    LIMIT_DOUBLE(&wCurrent, 0, (LockRangeI == 255) ? Params.MaxCurrent[DC2000mA]:Params.MaxCurrent[LockRangeI]);
+    LIMIT_FLOAT(&wVoltage, 0, (LockRangeU == 255) ? Params.MaxVoltage[1]:Params.MaxVoltage[LockRangeU]);
+    LIMIT_FLOAT(&wCurrent, 0, (LockRangeI == 255) ? Params.MaxCurrent[DC2000mA]:Params.MaxCurrent[LockRangeI]);
 
 
     if (TrackCh > 128)
@@ -563,8 +563,8 @@ void CheckLimits(void)
         Params.OutputOnOff = 1;
     }
 
-    LIMIT_DOUBLE(&DCVoltMod, 0.0, 1.0);
-    LIMIT_DOUBLE(&DCAmpMod, 0.0, 1.0);
+    LIMIT_FLOAT(&DCVoltMod, 0.0, 1.0);
+    LIMIT_FLOAT(&DCAmpMod, 0.0, 1.0);
     LIMIT_INT16(&Params.RippleMod, 0, 100);
     LIMIT_INT16(&Params.RippleOn, 0, 30000);
     LIMIT_INT16(&Params.RippleOff,0, 30000);
@@ -609,7 +609,7 @@ void CheckLimits(void)
 
 void CalcAmpWattHours(void)
 {
-    double dAmps = xCurrent;
+    float dAmps = xCurrent;
 
     if ( RippleActive )
     {
@@ -712,19 +712,19 @@ void jobGetValues(void)
     else
         xPowerTot = xPower;
 
-    LIMIT_DOUBLE(&xPowerTot, 0.0000001, 100000.0); // actually only to ensure non-negative values
+    LIMIT_FLOAT(&xPowerTot, 0.0000001, 100000.0); // actually only to ensure non-negative values
 
 }
 
 
-double GetPowerIn(void)
+float GetPowerIn(void)
 {
     return GetADC(4) * PwrInFac;
 }
 
 void InitScales(void)
 {
-    double Ufac;
+    float Ufac;
     uint32_t tmpDACMax, tmpADCMax;
     uint8_t i;
 
@@ -770,7 +770,7 @@ void InitScales(void)
     PwrInFac = Params.RefVoltage * Params.GainPwrIn / 1024;
     DACMax = tmpDACMax - 1; // für SetLevelDAC
     TrackCh = Params.TrackChSave;
-    ConfigLM75(Params.FanOnTemp);
+    LM75_Configure(Params.FanOnTemp);
 
     InitLockRangeU = Params.LockRangeU;
     if (InitLockRangeU > 1 && InitLockRangeU != 255)
@@ -784,7 +784,7 @@ void InitScales(void)
     }
 }
 
-uint8_t CalcRangeI(double I)
+uint8_t CalcRangeI(float I)
 {
     uint8_t Range = DC2mA;
 
@@ -803,11 +803,11 @@ void SetLevelDAC(void)
     uint8_t sreg;
     uint8_t Index = 0;
 
-    double tmpArbV;
+    float tmpArbV;
     uint16_t tmpArbT;
-    const double* ArbArrayV_Ptr;
+    const float* ArbArrayV_Ptr;
     const uint16_t* ArbArrayT_Ptr;
-    double RelativeMaxVoltage0;
+    float RelativeMaxVoltage0;
 
 //*** Conversion for Current *************************************************
 
@@ -913,7 +913,7 @@ void SetLevelDAC(void)
 
         // Option Multiple Sequence ROM_Array
         // Retrieve pointer to code for selected arbitray sequence
-        memcpy_P(&ArbArrayV_Ptr, &ArbArrayV[ArbSelect], sizeof(const double *));
+        memcpy_P(&ArbArrayV_Ptr, &ArbArrayV[ArbSelect], sizeof(const float *));
         memcpy_P(&ArbArrayT_Ptr, &ArbArrayT[ArbSelect], sizeof(const uint16_t *));
 
         RelativeMaxVoltage0 = Params.MaxVoltage[0] / wVoltage;
@@ -933,7 +933,7 @@ void SetLevelDAC(void)
                     if  ( Index >= ARBINDEXMAX ) break;
 
                     // Option Multiple Sequence ROM_Array, pick from  selected Sequence
-                    memcpy_P(&tmpArbV, &ArbArrayV_Ptr[Index], sizeof(double));
+                    memcpy_P(&tmpArbV, &ArbArrayV_Ptr[Index], sizeof(float));
                     memcpy_P(&tmpArbT, &ArbArrayT_Ptr[Index], sizeof(uint16_t));
 
                 }
@@ -990,7 +990,7 @@ void SetLevelDAC(void)
                 if  ( Index >= ARBINDEXMAX ) break;
 
                 // Option Multiple Sequence ROM_Array, pick from  selected Sequence
-                memcpy_P(&tmpArbV, &ArbArrayV_Ptr[Index], sizeof(double));
+                memcpy_P(&tmpArbV, &ArbArrayV_Ptr[Index], sizeof(float));
                 memcpy_P(&tmpArbT, &ArbArrayT_Ptr[Index], sizeof(uint16_t));
 
             }
@@ -1064,18 +1064,18 @@ void SetLevelDAC(void)
 
 void jobFaultCheck(void)
 {
-    double tmpVolt;
+    float tmpVolt;
     static uint8_t count = 0;
 
     if (++count >= 20)   // 20*100ms = 2s
     {
-        Temperature = GetLM75Temp();
+        Temperature = LM75_GetTemperature();
 
         if (Temperature > 80)
         {
             if (!Status.OverTemp)
             {
-                DPRINT(PSTR("%-10lu LM75: %.1f°C\n"), GetTicker(), Temperature);
+                DPRINT(PSTR("%-10lu LM75: %.1f°C\n"), Timer_GetTicker(), Temperature);
                 SerPrompt(OvlErr, Status.u8);
             }
             Status.OverTemp = 1;
@@ -1100,7 +1100,7 @@ void jobFaultCheck(void)
     {
         if (!Status.OverVolt && !lowInput)
         {
-            DPRINT(PSTR("%-10lu Vout: %.2f, Vin: %.2f\n"), GetTicker(), xMeanVoltage, tmpVolt);
+            DPRINT(PSTR("%-10lu Vout: %.2f, Vin: %.2f\n"), Timer_GetTicker(), xMeanVoltage, tmpVolt);
             SerPrompt(FaultErr, Status.u8);
         }
         Status.OverVolt = 1;
@@ -1228,12 +1228,12 @@ void jobSwitchRelay(void)
             {
                 if(Flags.PwrInRange)
                 {
-                    DPRINT(PSTR("%-10lu Relay 1: on\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 1: on\n"), Timer_GetTicker());
                     PORTB |= (1<<PB2);  // Relay 1 on
                 }
                 else
                 {
-                    DPRINT(PSTR("%-10lu Relay 2: on\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 2: on\n"), Timer_GetTicker());
                     PORTB |= (1<<PB3);  // Relay 2 on
                 }
                 RelayTimer = 2; // 8ms
@@ -1261,12 +1261,12 @@ void jobSwitchRelay(void)
                     {
                         if(Flags.PwrInRange)
                         {
-                            DPRINT(PSTR("%-10lu Relay 1: on\n"), GetTicker());
+                            DPRINT(PSTR("%-10lu Relay 1: on\n"), Timer_GetTicker());
                             PORTB |= (1<<PB2);  // Relay 1 on
                         }
                         else
                         {
-                            DPRINT(PSTR("%-10lu Relay 2: on\n"), GetTicker());
+                            DPRINT(PSTR("%-10lu Relay 2: on\n"), Timer_GetTicker());
                             PORTB |= (1<<PB3);  // Relay 2 on
                         }
                         RelayTimer = 2; // 8ms
@@ -1303,15 +1303,15 @@ void jobSwitchRelay(void)
 #ifdef DEBUG
                 if ((PORTB & ((1<<PB3)|(1<<PB2))) == ((1<<PB3)|(1<<PB2)))
                 {
-                    DPRINT(PSTR("%-10lu Relay 1,2: off\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 1,2: off\n"), Timer_GetTicker());
                 }
                 else if (PORTB & (1<<PB2))
                 {
-                    DPRINT(PSTR("%-10lu Relay 1: off\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 1: off\n"), Timer_GetTicker());
                 }
                 else if(PORTB & (1<<PB3))
                 {
-                    DPRINT(PSTR("%-10lu Relay 2: off\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 2: off\n"), Timer_GetTicker());
                 }
 #endif
                 PORTB &= ~(1<<PB2); // Relay 1 off
@@ -1324,7 +1324,7 @@ void jobSwitchRelay(void)
                 if (PORTB & (1<<PB3))
                 {
                     // Relay 2 is on
-                    DPRINT(PSTR("%-10lu Relay 2: off\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 2: off\n"), Timer_GetTicker());
                     PORTB &= ~(1<<PB3); // Relay 2 off
                     RelayTimer = 2;
                     Flags.RelayState = 1;
@@ -1336,7 +1336,7 @@ void jobSwitchRelay(void)
                 if (PORTB & (1<<PB2))
                 {
                     // Relay 1 is on
-                    DPRINT(PSTR("%-10lu Relay 1: off\n"), GetTicker());
+                    DPRINT(PSTR("%-10lu Relay 1: off\n"), Timer_GetTicker());
                     PORTB &= ~(1<<PB2); // Relay 1 off
                     RelayTimer = 2; // 8ms
                     Flags.RelayState = 1;
@@ -1402,15 +1402,15 @@ int main(void)
     sei();
 
     // Timer initialisieren
-    InitTimer();
+    Timer_Init();
 
     // Warten bis C's vom MAX232 geladen sind
-    wait_us(20000);
+    Timer_Wait_us(20000);
 
-    SlaveCh = ((uint8_t)~PIND) >> 5;
+    g_ucSlaveCh = ((uint8_t)~PIND) >> 5;
 
     // I2C initialisieren
-    initI2C();
+    I2C_Init();
 
     // Init LCD
     if (Lcd_Init())
@@ -1441,7 +1441,7 @@ int main(void)
 //init_Arb_RAMarray();
 
     // UART initialisieren
-    Uart_Init_UBRR(Params.SerBaudReg);
+    Uart_InitUBRR(Params.SerBaudReg);
 
     // printf auf UART verbiegen
     stdout = &mystdout;
@@ -1451,21 +1451,21 @@ int main(void)
     char s[9];
 
     Lcd_Write_P(0, 0, strlen_P(VersStrShort_P), VersStrShort_P);
-    sprintf_P(s, PSTR("Adr  %-3d"), SlaveCh);
+    sprintf_P(s, PSTR("Adr  %-3d"), g_ucSlaveCh);
 
     Lcd_Write(0, 1, 8, s);
 
 
     PORTD &= ~(1<<PD2);         // Activity LED an
 
-    wait_us(1000000);           // 1sec warten
+    Timer_Wait_us(1000000);           // 1sec warten
 
-    for (i = 0; i < SlaveCh; i++)
+    for (i = 0; i < g_ucSlaveCh; i++)
     {
         PORTD |= (1<<PD2);      // Activity LED aus
-        wait_us(150000);
+        Timer_Wait_us(150000);
         PORTD &= ~(1<<PD2);     // Activity LED ein
-        wait_us(150000);
+        Timer_Wait_us(150000);
     }
     PORTD |= (1<<PD2);          // Activity LED aus
 
@@ -1483,26 +1483,26 @@ int main(void)
     ArbActive = 0;
 
     SetLevelDAC();              // Anfangswerte
-    wait_us(4000);              // warten, daß die ersten DAC Werte, Strom und Spannung = 0 ausgegeben wurden
+    Timer_Wait_us(4000);              // warten, daß die ersten DAC Werte, Strom und Spannung = 0 ausgegeben wurden
 
     PORTC |= (1<<PC7);          // Outputenable == Ausgang ein
-    wait_us(4000);              // warten, daß die Regelschleife eingeschwungen ist
+    Timer_Wait_us(4000);              // warten, daß die Regelschleife eingeschwungen ist
 
     wCurrent = Params.InitCurrent;
     SetLevelDAC();              // Soll-Strom zuschalten
-    wait_us(4000);              // noch ein wenig abwarten
+    Timer_Wait_us(4000);              // noch ein wenig abwarten
 
     ParseGetParam(254);         // DCG-String auf dem Bus ausgeben
 
 
     // Timer Starten
-    StartTimers();
+    Timer_StartTimers();
 
     set_sleep_mode(SLEEP_MODE_IDLE);
 
     while(1)
     {
-        if (TestAndResetTimerOV(TIMER_100MS))
+        if (Timer_TestAndResetTimerOV(TIMER_100MS))
         {
             // Funktionen mit 100ms Periode
             CalcAmpWattHours();
@@ -1520,16 +1520,16 @@ int main(void)
                 ToggleDisplay = 0x00;
             }
         }
-        if (TestAndResetTimerOV(TIMER_50MS))
+        if (Timer_TestAndResetTimerOV(TIMER_50MS))
         {
             // Funktionen mit 50ms Periode
             jobPanel();
         }
-        if (TestAndResetTimerOV(TIMER_10MS))
+        if (Timer_TestAndResetTimerOV(TIMER_10MS))
         {
             // Funktionen mit 10ms Periode
         }
-        if (TestAndResetTimerOV(TIMER_4MS))
+        if (Timer_TestAndResetTimerOV(TIMER_4MS))
         {
             jobGetValues();
 
@@ -1560,7 +1560,7 @@ int main(void)
                     SetLevelDAC();              // Anfangswerte
                     SendTrackCmd();
                     Flags.PwrInRange = 0;
-                    ErrCount = 0;
+                    g_ucErrCount = 0;
                 }
                 else if (StartTimer == 40)
                 {

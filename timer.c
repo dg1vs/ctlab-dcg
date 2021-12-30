@@ -46,7 +46,7 @@ static uint8_t TimeBase4ms;
 static uint8_t TimeBase10ms;
 static uint8_t TimeBase100ms;
 
-void InitTimer(void)
+void Timer_Init(void)
 {
     uint8_t sreg = SREG;
     cli();
@@ -648,7 +648,7 @@ ISR(TIMER2_COMPA_vect)
                 TimerFlags.Timer50msOV = 1;
             }
         }
-        jobEncoder();                   // runtime is part of the DAC settle time
+        Encoder_MainFunction();                   // runtime is part of the DAC settle time
         _delay_us(20);                  // more settle time
 
 #ifndef DUAL_DAC
@@ -768,7 +768,7 @@ ISR(TIMER2_COMPA_vect)
                 PORTC |= (1<<PC6);      // MUX für ADC auf U
             }
         }
-        jobEncoder();
+        Encoder_MainFunction();
     }
 
 
@@ -789,7 +789,7 @@ ISR(TIMER2_COMPA_vect)
 #endif
 }
 
-void StartTimers(void)
+void Timer_StartTimers(void)
 {
     uint8_t sreg;
 
@@ -809,7 +809,7 @@ void StartTimers(void)
     SREG = sreg;
 }
 
-uint8_t TestAndResetTimerOV(uint8_t TimerId)
+uint8_t Timer_TestAndResetTimerOV(uint8_t TimerId)
 {
     uint8_t result = 0;
     uint8_t sreg;
@@ -863,7 +863,7 @@ uint8_t TestAndResetTimerOV(uint8_t TimerId)
     return result;
 }
 
-uint32_t GetTicker(void)
+uint32_t Timer_GetTicker(void)
 {
     uint32_t result;
     uint8_t sreg;
@@ -878,11 +878,11 @@ uint32_t GetTicker(void)
     return result;
 }
 
-void wait_us(uint32_t us)
+void Timer_Wait_us(uint32_t us)
 {
     uint32_t start, stop, current;
 
-    current = start = GetTicker();
+    current = start = Timer_GetTicker();
 
     stop = start + us / 100;
 
@@ -890,11 +890,11 @@ void wait_us(uint32_t us)
     {
         while (current >= start)
         {
-            current = GetTicker();
+            current = Timer_GetTicker();
         }
     }
     while (current < stop)
     {
-        current = GetTicker();
+        current = Timer_GetTicker();
     }
 }

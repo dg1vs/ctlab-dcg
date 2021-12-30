@@ -28,10 +28,10 @@
 #define TIMER_50MS      50
 #define TIMER_100MS     100
 
-uint8_t TestAndResetTimerOV(uint8_t TimerId);
-void InitTimer(void);
-uint32_t GetTicker(void);
-void wait_us(uint32_t);
-void StartTimers(void);
+uint8_t  Timer_TestAndResetTimerOV(uint8_t TimerId);
+void	 Timer_Init(void);
+uint32_t Timer_GetTicker(void);
+void	 Timer_Wait_us(uint32_t);
+void     Timer_StartTimers(void);
 
 #endif

@@ -210,7 +210,7 @@ uint8_t PanelPrintFault(char *line)
 /// \return uint8_t : high nibble -> position of decimal point
 ///                   low nibble  -> position of the first visible digit
 //---------------------------------------------------------------------------------------------
-uint8_t GetValuePosition(double value, uint8_t mode)
+uint8_t GetValuePosition(float value, uint8_t mode)
 {
 
     /*  value       "position"  expo    display     value in
@@ -230,7 +230,7 @@ uint8_t GetValuePosition(double value, uint8_t mode)
     if ( (mode == VOLT) || (mode == ModifyVolt) )
     {
 
-        if (value < 9.9995)  //10.0)   // caution! sprintf in DoubleToString uses rounding after the last digit!
+        if (value < 9.9995)  //10.0)   // caution! sprintf in FloatToString uses rounding after the last digit!
         {
             return 0x63;
         }
@@ -454,7 +454,7 @@ void RangeCurrentToString(char* str, uint8_t Range)
     str[8] = 0;
 }
 
-void DoubleToString(char* str, double i, uint8_t mode)
+void FloatToString(char* str, float i, uint8_t mode)
 {
     char cUnit=0;
     char cUnitHour = ' ';
@@ -538,7 +538,7 @@ void RangeVoltageToString(char* str, uint8_t Range)
 
 
 /*
-void TemperatureToString(char* str, double i)
+void TemperatureToString(char* str, float i)
 {
                                                     // Temperature string in °Celsius
     sprintf_P(str, PSTR("%+5.1f\337C "), i);        // '°' = 0337 =0xdf
@@ -550,7 +550,7 @@ void TemperatureToString(char* str, double i)
 void PanelPrintU(uint8_t cursor)
 {
     char line[9];
-    double* dptr;
+    float* dptr;
 
     dptr = &xVoltage;
 
@@ -562,7 +562,7 @@ void PanelPrintU(uint8_t cursor)
         }
     }
 
-    DoubleToString(line, *dptr, VOLT);
+    FloatToString(line, *dptr, VOLT);
 
     if (cursor != ' ')
     {
@@ -584,7 +584,7 @@ void PanelPrintU(uint8_t cursor)
 void PanelPrintI(uint8_t cursor)
 {
     char line[9];
-    double* dptr;
+    float* dptr;
 
     if (!PanelPrintFault(line))
     {
@@ -598,7 +598,7 @@ void PanelPrintI(uint8_t cursor)
             }
         }
 
-        DoubleToString(line, *dptr, AMP );
+        FloatToString(line, *dptr, AMP );
 
         if (cursor != ' ')
         {
@@ -617,7 +617,7 @@ void PanelPrintI(uint8_t cursor)
 }
 
 
-double GetIncrement(int8_t pos)
+float GetIncrement(int8_t pos)
 {
     return pow(10, pos - 6);
 }
@@ -661,8 +661,8 @@ void jobPanel(void)
         static const char *PDisplayString;
         uint8_t OutSubCh=0;
 
-        double *pwValue = &wCurrent;
-        double RoundFactor = 1.0;
+        float *pwValue = &wCurrent;
+        float RoundFactor = 1.0;
         int8_t *pModifyValuePos = &ModifyCurrentPos;
 
         static uint8_t GoSub = 0;
@@ -852,7 +852,7 @@ void jobPanel(void)
             }
         }
 
-        EncDiffSpeed = EncDiff += GetAndResetEncPos();
+        EncDiffSpeed = EncDiff += Encoder_GetAndResetPosition();
 
         if (EncDiff != 0)
         {
@@ -1086,7 +1086,7 @@ void jobPanel(void)
                             ModifyPos--;
                         }
 
-                        DoubleToString(DisplayStr, *pwValue, unit);
+                        FloatToString(DisplayStr, *pwValue, unit);
                         ModifyChr = DisplayStr[ModifyPos];
                     }
                     break;
@@ -1980,7 +1980,7 @@ void jobPanel(void)
 
                     if (!PanelPrintFault(DisplayStr))
                     {
-                        DoubleToString(DisplayStr, xPowerTot, WATT);
+                        FloatToString(DisplayStr, xPowerTot, WATT);
                     }
                     Lcd_Write(0, 1, 8, DisplayStr);
                     break;
@@ -1989,12 +1989,12 @@ void jobPanel(void)
                 // *** Display WattHours and AmpHours **************************************************
 
                 case ModifyAmpWattHours:
-                    DoubleToString(DisplayStr, xAmpHours, AMPHOUR);
+                    FloatToString(DisplayStr, xAmpHours, AMPHOUR);
                     Lcd_Write(0, 0, 8, DisplayStr);
 
                     if (!PanelPrintFault(DisplayStr))
                     {
-                        DoubleToString(DisplayStr, xWattHours, WATTHOUR);
+                        FloatToString(DisplayStr, xWattHours, WATTHOUR);
                     }
                     Lcd_Write(0, 1, 8, DisplayStr);
                     break;

@@ -127,7 +127,7 @@ const PROGMEM uint8_t ucEncoderTable4[24] =
 //  every EncoderTable must contain the same number of states ( * input options) = 24, to avoid an out of bounds access
 //  to a table in case the Encoder step size is switched by the user during runtime.
 
-void jobEncoder(void)
+void Encoder_MainFunction(void)
 {
     static uint8_t EncState = 3;
     uint8_t next = 0xFF;
@@ -170,11 +170,10 @@ void jobEncoder(void)
         {
             default:    // well, actually no code here. To be implemented in case of new types of encoders having pulse counts other than 4 or 2
                 // if no predefined code is set in eeprom, revert to "4"
-
             case 4:     // Encoder with 4 pulses per step
                 ucNewState = pgm_read_byte(&ucEncoderTable4[ucTableOffset]);
                 break;
-            case 2:     // Encoder with 2 pulses per step
+	        case 2:     // Encoder with 2 pulses per step
                 ucNewState = pgm_read_byte(&ucEncoderTable2[ucTableOffset]);
                 break;
         }
@@ -199,7 +198,7 @@ void jobEncoder(void)
 }
 
 
-int8_t GetEncoderPos(uint8_t reset)
+int8_t Encoder_GetPosition(uint8_t reset)
 {
     uint8_t sreg;
     int8_t pos;
@@ -217,7 +216,7 @@ int8_t GetEncoderPos(uint8_t reset)
     return pos;
 }
 
-int8_t GetAndResetEncPos(void)
+int8_t Encoder_GetAndResetPosition(void)
 {
-    return GetEncoderPos(1);
+    return Encoder_GetPosition(1);
 }

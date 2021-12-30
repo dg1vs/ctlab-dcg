@@ -23,7 +23,7 @@
 
 #include <util/delay.h>
 
-#include "i2creg.h"
+#include "I2CRegister.h"
 
 #define NDEBUG
 #include "debug.h"
@@ -44,107 +44,10 @@ uint16_t GetADC(uint8_t Channel)
     return (Result + 2) / 4;
 }
 
-#if 0
-uint16_t ShiftIn1864(void)
-{
-    union
-    {
-        uint8_t u8[2];
-        uint16_t u16;
-    } data;
-    uint8_t i;
-
-    PORTB |= (1<<PB0);                  // SCLK high
-
-    data.u16 = 0;
-    _delay_us(4);
-
-    PORTB &= ~(1<<PB7);                 // STRADC low
-
-    _delay_us(1);
-
-    for (i = 0; i < 8; i++)
-    {
-        PORTB &= ~(1<<PB0);             // SCLK low
-        data.u8[1] <<= 1;
-        PORTB |= (1<<PB0);              // SCLK high
-
-        if (PINB & (1<<PB6))
-        {
-            data.u8[1] |= 0x01;
-        }
-    }
-
-    for (i = 0; i < 8; i++)
-    {
-        PORTB &= ~(1<<PB0);             // SCLK low
-        data.u8[0] <<= 1;
-        PORTB |= (1<<PB0);              // SCLK high
-
-        if (PINB & (1<<PB6))
-        {
-            data.u8[0] |= 0x01;
-        }
-    }
-
-
-    PORTB |= (1<<PB7);                  // STRADC high
-
-    return data.u16;
-}
-#endif
-
-#if 0
-void ShiftOut1655(uint16_t Value)
-{
-    uint8_t tmp;
-    uint8_t i;
-
-    PORTB &= ~(1<<PB0);                 // SCLK low
-    PORTB &= ~(1<<PB4);                 // STRDC low
-
-    tmp = ((uint8_t*)Value)[1];
-
-    for (i = 0; i < 8; i++)
-    {
-        if (tmp & 0x80)
-        {
-            PORTB |= (1<<PB1);          // SDATA high
-        }
-        else
-        {
-            PORTB &= ~(1<<PB1);         // SDATA low
-        }
-        PORTB |= (1<<PB0);              // SCLK high
-        tmp <<= 1;
-        PORTB &= ~(1<<PB0);             // SCLK low
-    }
-
-    tmp = (uint8_t)Value;
-
-    for (i = 0; i < 8; i++)
-    {
-        if (tmp & 0x80)
-        {
-            PORTB |= (1<<PB1);          // SDATA high
-        }
-        else
-        {
-            PORTB &= ~(1<<PB1);         // SDATA low
-        }
-        PORTB |= (1<<PB0);              // SCLK high
-        tmp <<= 1;
-        PORTB &= ~(1<<PB0);             // SCLK low
-    }
-    PORTB |= (1<<PB4);                  // STRDC high
-}
-#endif
 
 
 
 void ShiftOut1257(uint16_t Value)
-
-
 {
     uint8_t tmp;
     uint8_t i;
@@ -193,7 +96,7 @@ void ShiftOut1257(uint16_t Value)
     PORTB |= (1<<PB4);                  // STRDC high
 }
 
-void ConfigLM75(double Temp)
+void LM75_Configure(float Temp)
 {
     uint8_t data[2];
     uint16_t Temp2;
@@ -202,7 +105,7 @@ void ConfigLM75(double Temp)
 
     // Optionsregister, invertierter Ausgang, fault queue auf max
     data[0] = 0x1c;
-    if (i2c_write_regs(0x90, 1, 1, data))
+    if (I2CRegister_Write(0x90, 1, 1, data))
     {
         DPRINT(PSTR("%s: Couldn't detect a device at address 0x90\n"), __FUNCTION__);
     }
@@ -211,21 +114,21 @@ void ConfigLM75(double Temp)
     // Tos Register,
     data[0] = Temp2 >> 1;
     data[1] = Temp2 << 7;
-    i2c_write_regs(0x90, 3, 2, data);
+    I2CRegister_Write(0x90, 3, 2, data);
 
     // Thyst. Temperatur - 5°C
     Temp2 -= 10;
     data[0] = Temp2 >> 1;
     data[1] = Temp2 << 7;
-    i2c_write_regs(0x90, 2, 2, data);
+    I2CRegister_Write(0x90, 2, 2, data);
 }
 
-double GetLM75Temp(void)
+float LM75_GetTemperature(void)
 {
     uint8_t data[2] = {0x19, 0x00};     // 25°C
     int16_t tmp;
 
-    i2c_read_regs(0x90, 0, 2, data);
+    I2CRegister_Read(0x90, 0, 2, data);
     tmp = (data[0] << 1) | (data[1] >> 7);
     if (tmp & 0x100)
     {
@@ -235,3 +138,101 @@ double GetLM75Temp(void)
     return tmp / 2.0;
 }
 
+
+
+
+//#if 0
+//uint16_t ShiftIn1864(void)
+//{
+//	union
+//	{
+//		uint8_t u8[2];
+//		uint16_t u16;
+//	} data;
+//	uint8_t i;
+//
+//	PORTB |= (1<<PB0);                  // SCLK high
+//
+//	data.u16 = 0;
+//	_delay_us(4);
+//
+//	PORTB &= ~(1<<PB7);                 // STRADC low
+//
+//	_delay_us(1);
+//
+//	for (i = 0; i < 8; i++)
+//	{
+//		PORTB &= ~(1<<PB0);             // SCLK low
+//		data.u8[1] <<= 1;
+//		PORTB |= (1<<PB0);              // SCLK high
+//
+//		if (PINB & (1<<PB6))
+//		{
+//			data.u8[1] |= 0x01;
+//		}
+//	}
+//
+//	for (i = 0; i < 8; i++)
+//	{
+//		PORTB &= ~(1<<PB0);             // SCLK low
+//		data.u8[0] <<= 1;
+//		PORTB |= (1<<PB0);              // SCLK high
+//
+//		if (PINB & (1<<PB6))
+//		{
+//			data.u8[0] |= 0x01;
+//		}
+//	}
+//
+//
+//	PORTB |= (1<<PB7);                  // STRADC high
+//
+//	return data.u16;
+//}
+//#endif
+//
+//#if 0
+//void ShiftOut1655(uint16_t Value)
+//{
+//	uint8_t tmp;
+//	uint8_t i;
+//
+//	PORTB &= ~(1<<PB0);                 // SCLK low
+//	PORTB &= ~(1<<PB4);                 // STRDC low
+//
+//	tmp = ((uint8_t*)Value)[1];
+//
+//	for (i = 0; i < 8; i++)
+//	{
+//		if (tmp & 0x80)
+//		{
+//			PORTB |= (1<<PB1);          // SDATA high
+//		}
+//		else
+//		{
+//			PORTB &= ~(1<<PB1);         // SDATA low
+//		}
+//		PORTB |= (1<<PB0);              // SCLK high
+//		tmp <<= 1;
+//		PORTB &= ~(1<<PB0);             // SCLK low
+//	}
+//
+//	tmp = (uint8_t)Value;
+//
+//	for (i = 0; i < 8; i++)
+//	{
+//		if (tmp & 0x80)
+//		{
+//			PORTB |= (1<<PB1);          // SDATA high
+//		}
+//		else
+//		{
+//			PORTB &= ~(1<<PB1);         // SDATA low
+//		}
+//		PORTB |= (1<<PB0);              // SCLK high
+//		tmp <<= 1;
+//		PORTB &= ~(1<<PB0);             // SCLK low
+//	}
+//	PORTB |= (1<<PB4);                  // STRDC high
+//}
+//#endif

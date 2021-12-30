@@ -85,33 +85,33 @@ typedef struct
 typedef struct
 {
     int16_t DACUOffsets[2];
-    double DACUScales[2];
+    float DACUScales[2];
     int16_t DACIOffsets[4];
-    double DACIScales[4];
+    float DACIScales[4];
     int16_t ADCUOffsets[2];
-    double ADCUScales[2];
+    float ADCUScales[2];
     int16_t ADCIOffsets[4];
-    double ADCIScales[4];
-    double InitVoltage;
-    double InitCurrent;
-    double GainPre;
-    double GainOut;
-    double GainI;
-    double RefVoltage;
-    double MaxVoltage[2];
-    double RSense[4];
-    double MaxCurrent[4];
-    double ADCUfacs[2];
+    float ADCIScales[4];
+    float InitVoltage;
+    float InitCurrent;
+    float GainPre;
+    float GainOut;
+    float GainI;
+    float RefVoltage;
+    float MaxVoltage[2];
+    float RSense[4];
+    float MaxCurrent[4];
+    float ADCUfacs[2];
     OPTIONS Options;
-    double RelayVoltage;
-    double FanOnTemp;
+    float RelayVoltage;
+    float FanOnTemp;
     int16_t RippleOn;
     int16_t RippleOff;
     int16_t RippleMod;
     uint8_t IncRast;
     uint8_t SerBaudReg;
     uint8_t TrackChSave;
-    double GainPwrIn;
+    float GainPwrIn;
     uint8_t LockRangeU;
     uint8_t LockRangeI;
     uint16_t Initialised;
@@ -120,12 +120,12 @@ typedef struct
 
 typedef struct
 {
-    double InitVoltage;
-    double InitCurrent;
-//  double InitPower;
-//  double InitOhm;
+    float InitVoltage;
+    float InitCurrent;
+//  float InitPower;
+//  float InitOhm;
 //  uint8_t ModeRange;
-//  double LimitCurrent;
+//  float LimitCurrent;
     int16_t RippleOn;
     int16_t RippleOff;
     int16_t RippleMod;
@@ -140,23 +140,23 @@ extern STATUS Status;
 extern PARAMS Params;
 extern PARAMS eepParams EEMEM;
 
-extern double DCVoltMod;
-extern double DCAmpMod;
-extern double Temperature;
-extern double xVoltage;
-extern double xVoltageLow;
-extern double xCurrent;
-extern double xCurrentLow;
-extern double xPower;
-extern double xPowerTot;
-extern double xAmpHours;
-extern double xWattHours;
+extern float DCVoltMod;
+extern float DCAmpMod;
+extern float Temperature;
+extern float xVoltage;
+extern float xVoltageLow;
+extern float xCurrent;
+extern float xCurrentLow;
+extern float xPower;
+extern float xPowerTot;
+extern float xAmpHours;
+extern float xWattHours;
 
-extern double xMeanVoltage;
-extern double xMeanCurrent;
+extern float xMeanVoltage;
+extern float xMeanCurrent;
 
-extern double wVoltage;
-extern double wCurrent;
+extern float wVoltage;
+extern float wCurrent;
 
 extern uint16_t ADCRawU;
 extern uint16_t ADCRawULow;
@@ -171,9 +171,9 @@ extern int16_t TmrRippleMod;
 extern int16_t TmrRippleOn;
 extern int16_t TmrRippleOff;
 
-extern uint8_t SlaveCh;
+extern uint8_t g_ucSlaveCh;
 extern uint8_t TrackCh;
-extern uint16_t ErrCount;
+extern uint16_t g_ucErrCount;
 
 extern uint8_t RangeI;
 extern uint8_t RangeU;
@@ -193,7 +193,7 @@ extern uint8_t wStartParamSet;
 
 
 extern const char VersStrLong[];
-extern char SerInpStr[];
+extern char g_cSerInpStr[];
 
 extern uint16_t RippleActive;
 
@@ -218,14 +218,14 @@ extern uint8_t ArbRAMOffset;
 
 #define ARBINDEXMAXRAM 75
 
-extern double   ArbV_RAM[ARBINDEXMAXRAM];
+extern float   ArbV_RAM[ARBINDEXMAXRAM];
 extern uint16_t ArbT_RAM[ARBINDEXMAXRAM];
 
-extern double   ArbV_EEP[ARBINDEXMAXRAM]  EEMEM;
+extern float   ArbV_EEP[ARBINDEXMAXRAM]  EEMEM;
 extern uint16_t ArbT_EEP[ARBINDEXMAXRAM]  EEMEM;
 
 extern uint8_t  ArbUpdateMode;
-extern double   ArbRAMtmpV;
+extern float   ArbRAMtmpV;
 extern uint16_t ArbRAMtmpT;
 
 extern uint8_t get_SequenceStart_RAMarray(uint8_t*);
@@ -235,11 +235,11 @@ extern uint8_t get_SequenceStart_RAMarray(uint8_t*);
 
 
 // dcg.c //////////////////////////////////////////////////
-double GetPowerIn(void);
+float GetPowerIn(void);
 void InitScales(void);
 void SetLevelDAC(void);
 void CheckLimits(void);
-uint8_t CalcRangeI(double);
+uint8_t CalcRangeI(float);
 void SetActivityTimer(uint8_t);
 
 void SaveUserParamSet(uint8_t set);
@@ -247,7 +247,7 @@ uint8_t RecallUserParamSet(uint8_t set, uint8_t mode);
 uint8_t RecallDefaultParamSet(void);
 void PushParamSet(void);
 
-void LIMIT_DOUBLE(double *param, double min, double max);
+void LIMIT_FLOAT(float *param, float min, float max);
 void LIMIT_UINT8(uint8_t *param, uint8_t min, uint8_t max);
 void LIMIT_INT16(int16_t *param, int16_t min, int16_t max);
 void LIMIT_UINT16(uint16_t *param, uint16_t min, uint16_t max);
@@ -263,8 +263,8 @@ void ShiftOut1655(uint16_t);
 #endif
 void ShiftOut1257(uint16_t);
 uint16_t ShiftIn1864(void);
-double GetLM75Temp(void);
-void ConfigLM75(double);
+float LM75_GetTemperature(void);
+void LM75_Configure(float);
 
 // dcg-panel.h ////////////////////////////////////////////
 void jobPanel(void);

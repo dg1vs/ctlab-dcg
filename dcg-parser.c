@@ -62,7 +62,7 @@ const PROGMEM char Mnemonics[][4] =
 };
 
 
-#define PARAM_DOUBLE    0
+#define PARAM_FLOAT    0
 #define PARAM_INT       1
 #define PARAM_BYTE      2
 #define PARAM_STR       3
@@ -80,7 +80,7 @@ typedef struct _PARAMTABLE
     uint8_t SubCh;
     union
     {
-        double (*get_f_Function)(void);
+        float (*get_f_Function)(void);
         int32_t (*get_l_Function)(void);
         int16_t (*get_i_Function)(void);
         uint16_t (*get_u_Function)(void);
@@ -91,7 +91,7 @@ typedef struct _PARAMTABLE
         {
             union
             {
-                double* f;
+                float* f;
                 int32_t* l;
                 int16_t* i;
                 uint16_t* u;
@@ -100,7 +100,7 @@ typedef struct _PARAMTABLE
             } ram;
             union
             {
-                double* f;
+                float* f;
                 int32_t* l;
                 int16_t* i;
                 uint16_t* u;
@@ -109,7 +109,7 @@ typedef struct _PARAMTABLE
             } eep;
         } s;
     } u;
-    uint8_t type        : 3; // Type of function/variable (int, double etc.)
+    uint8_t type        : 3; // Type of function/variable (int, float etc.)
     uint8_t scale       : 3;
     uint8_t rw          : 1; // 0 = read command (returns values to the caller), 1 = write (values to ctlab)
     uint8_t fct         : 2; // 0 = variable access, 1 = function pointer, 2 = special function
@@ -155,7 +155,7 @@ void GetAll(PARAMTABLE* ParamTable __attribute__((unused)))
 
 void ReturnInput(PARAMTABLE* ParamTable __attribute__((unused)))
 {
-    printf_P(PSTR("%s\n"), SerInpStr);
+    printf_P(PSTR("%s\n"), g_cSerInpStr);
 }
 
 /*
@@ -173,22 +173,22 @@ void ReturnIDN(PARAMTABLE* ParamTable __attribute__((unused)))
 const PROGMEM PARAMTABLE SetParamTable[] =
 {
     // Die Einträge müssen nach SubCh sortiert sein
-    {.SubCh = 0,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &wVoltage, .eep.f = (double*)-1}},
-    {.SubCh = 1,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_A,    .u.s = {.ram.f = &wCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 2,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_mA,   .u.s = {.ram.f = &wCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 3,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_uA,   .u.s = {.ram.f = &wCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 7,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &xAmpHours, .eep.f = (double*)-1}},
-    {.SubCh = 8,   .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &xWattHours,.eep.f = (double*)-1}},
-    {.SubCh = 10,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &xVoltage, .eep.f = (double*)-1}},
-    {.SubCh = 11,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_A,    .u.s = {.ram.f = &xCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 12,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_mA,   .u.s = {.ram.f = &xCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 13,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_uA,   .u.s = {.ram.f = &xCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 15,  .rw = 0, .fct = 1, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.get_f_Function = GetPowerIn},
-    {.SubCh = 16,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &xMeanVoltage, .eep.f = (double*)-1}},
-    {.SubCh = 17,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_A,    .u.s = {.ram.f = &xMeanCurrent, .eep.f = (double*)-1}},
-    {.SubCh = 18,  .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &xPower, .eep.f = (double*)-1}},
-    {.SubCh = 20,  .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_PROZ, .u.s = {.ram.f = &DCVoltMod,  .eep.f = (double*)-1}},
-    {.SubCh = 21,  .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_PROZ, .u.s = {.ram.f = &DCAmpMod,   .eep.f = (double*)-1}},
+    {.SubCh = 0,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &wVoltage, .eep.f = (float*)-1}},
+    {.SubCh = 1,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_A,    .u.s = {.ram.f = &wCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 2,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_mA,   .u.s = {.ram.f = &wCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 3,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_uA,   .u.s = {.ram.f = &wCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 7,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &xAmpHours, .eep.f = (float*)-1}},
+    {.SubCh = 8,   .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &xWattHours,.eep.f = (float*)-1}},
+    {.SubCh = 10,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &xVoltage, .eep.f = (float*)-1}},
+    {.SubCh = 11,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_A,    .u.s = {.ram.f = &xCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 12,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_mA,   .u.s = {.ram.f = &xCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 13,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_uA,   .u.s = {.ram.f = &xCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 15,  .rw = 0, .fct = 1, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.get_f_Function = GetPowerIn},
+    {.SubCh = 16,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &xMeanVoltage, .eep.f = (float*)-1}},
+    {.SubCh = 17,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_A,    .u.s = {.ram.f = &xMeanCurrent, .eep.f = (float*)-1}},
+    {.SubCh = 18,  .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &xPower, .eep.f = (float*)-1}},
+    {.SubCh = 20,  .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_PROZ, .u.s = {.ram.f = &DCVoltMod,  .eep.f = (float*)-1}},
+    {.SubCh = 21,  .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_PROZ, .u.s = {.ram.f = &DCAmpMod,   .eep.f = (float*)-1}},
     {.SubCh = 27,  .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleOn,  .eep.i = (int16_t*)-1}},
     {.SubCh = 28,  .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleOff, .eep.i = (int16_t*)-1}},
     {.SubCh = 29,  .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleMod, .eep.i = (int16_t*)-1}},
@@ -201,7 +201,7 @@ const PROGMEM PARAMTABLE SetParamTable[] =
     {.SubCh = 70,  .rw = 0, .fct = 0, .type = PARAM_UINT16, .scale = SCALE_NONE, .u.s.ram.u = &DACRawU},
     {.SubCh = 71,  .rw = 0, .fct = 0, .type = PARAM_UINT16, .scale = SCALE_NONE, .u.s.ram.u = &DACRawI},
     {.SubCh = 89,  .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &Params.IncRast, .eep.b = &eepParams.IncRast}},
-    {.SubCh = 99,  .rw = 0, .fct = 2, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.doFunction = GetAll},
+    {.SubCh = 99,  .rw = 0, .fct = 2, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.doFunction = GetAll},
     {.SubCh = 100, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.DACUOffsets[0], .eep.i = &eepParams.DACUOffsets[0]}},
     {.SubCh = 101, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.DACUOffsets[1], .eep.i = &eepParams.DACUOffsets[1]}},
     {.SubCh = 102, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.DACIOffsets[0], .eep.i = &eepParams.DACIOffsets[0]}},
@@ -214,27 +214,27 @@ const PROGMEM PARAMTABLE SetParamTable[] =
     {.SubCh = 113, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.ADCIOffsets[1], .eep.i = &eepParams.ADCIOffsets[1]}},
     {.SubCh = 114, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.ADCIOffsets[2], .eep.i = &eepParams.ADCIOffsets[2]}},
     {.SubCh = 115, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.ADCIOffsets[3], .eep.i = &eepParams.ADCIOffsets[3]}},
-    {.SubCh = 150, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.InitVoltage, .eep.f = &eepParams.InitVoltage}},
-    {.SubCh = 151, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.InitCurrent, .eep.f = &eepParams.InitCurrent}},
-    {.SubCh = 152, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainPre, .eep.f = &eepParams.GainPre}},
-    {.SubCh = 153, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainOut, .eep.f = &eepParams.GainOut}},
-    {.SubCh = 154, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainI, .eep.f = &eepParams.GainI}},
-    {.SubCh = 155, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RefVoltage, .eep.f = &eepParams.RefVoltage}},
-    {.SubCh = 156, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxVoltage[1], .eep.f = &eepParams.MaxVoltage[1]}},
-    {.SubCh = 157, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[0], .eep.f = &eepParams.RSense[0]}},
-    {.SubCh = 158, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[1], .eep.f = &eepParams.RSense[1]}},
-    {.SubCh = 159, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[2], .eep.f = &eepParams.RSense[2]}},
-    {.SubCh = 160, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[3], .eep.f = &eepParams.RSense[3]}},
-    {.SubCh = 161, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[0], .eep.f = &eepParams.MaxCurrent[0]}},
-    {.SubCh = 162, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[1], .eep.f = &eepParams.MaxCurrent[1]}},
-    {.SubCh = 163, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[2], .eep.f = &eepParams.MaxCurrent[2]}},
-    {.SubCh = 164, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[3], .eep.f = &eepParams.MaxCurrent[3]}},
-    {.SubCh = 165, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUfacs[0],   .eep.f = &eepParams.ADCUfacs[0]}},
-    {.SubCh = 166, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUfacs[1],   .eep.f = &eepParams.ADCUfacs[1]}},
+    {.SubCh = 150, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.InitVoltage, .eep.f = &eepParams.InitVoltage}},
+    {.SubCh = 151, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.InitCurrent, .eep.f = &eepParams.InitCurrent}},
+    {.SubCh = 152, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainPre, .eep.f = &eepParams.GainPre}},
+    {.SubCh = 153, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainOut, .eep.f = &eepParams.GainOut}},
+    {.SubCh = 154, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.GainI, .eep.f = &eepParams.GainI}},
+    {.SubCh = 155, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RefVoltage, .eep.f = &eepParams.RefVoltage}},
+    {.SubCh = 156, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxVoltage[1], .eep.f = &eepParams.MaxVoltage[1]}},
+    {.SubCh = 157, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[0], .eep.f = &eepParams.RSense[0]}},
+    {.SubCh = 158, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[1], .eep.f = &eepParams.RSense[1]}},
+    {.SubCh = 159, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[2], .eep.f = &eepParams.RSense[2]}},
+    {.SubCh = 160, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RSense[3], .eep.f = &eepParams.RSense[3]}},
+    {.SubCh = 161, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[0], .eep.f = &eepParams.MaxCurrent[0]}},
+    {.SubCh = 162, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[1], .eep.f = &eepParams.MaxCurrent[1]}},
+    {.SubCh = 163, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[2], .eep.f = &eepParams.MaxCurrent[2]}},
+    {.SubCh = 164, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxCurrent[3], .eep.f = &eepParams.MaxCurrent[3]}},
+    {.SubCh = 165, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUfacs[0],   .eep.f = &eepParams.ADCUfacs[0]}},
+    {.SubCh = 166, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUfacs[1],   .eep.f = &eepParams.ADCUfacs[1]}},
     {.SubCh = 167, .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = (uint8_t*)&Params.Options, .eep.b = (uint8_t*)&eepParams.Options}},
-    {.SubCh = 168, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxVoltage[0], .eep.f = &eepParams.MaxVoltage[0]}},
-    {.SubCh = 170, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RelayVoltage,  .eep.f = &eepParams.RelayVoltage}},
-    {.SubCh = 171, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.FanOnTemp,     .eep.f = &eepParams.FanOnTemp}},
+    {.SubCh = 168, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.MaxVoltage[0], .eep.f = &eepParams.MaxVoltage[0]}},
+    {.SubCh = 170, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.RelayVoltage,  .eep.f = &eepParams.RelayVoltage}},
+    {.SubCh = 171, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.FanOnTemp,     .eep.f = &eepParams.FanOnTemp}},
     {.SubCh = 172, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleOn,  .eep.i = &eepParams.RippleOn}},
     {.SubCh = 173, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleOff, .eep.i = &eepParams.RippleOff}},
     {.SubCh = 174, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.RippleMod, .eep.i = &eepParams.RippleMod}},
@@ -248,25 +248,25 @@ const PROGMEM PARAMTABLE SetParamTable[] =
     {.SubCh = 184, .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &ArbRepeat, .eep.b = (uint8_t*)-1}},
     {.SubCh = 185, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &ArbDelay,  .eep.i = (int16_t*)-1}},
 
-    {.SubCh = 186, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &ArbRAMtmpV, .eep.f = (double*)-1}},
+    {.SubCh = 186, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &ArbRAMtmpV, .eep.f = (float*)-1}},
     {.SubCh = 187, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.u = &ArbRAMtmpT, .eep.u = (uint16_t*)-1}},
     {.SubCh = 188, .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &ArbUpdateMode, .eep.b = (uint8_t*)-1}},
     {.SubCh = 189, .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &ArbSelectRAM,  .eep.b = (uint8_t*)-1}},
 
-    {.SubCh = 200, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACUScales[0], .eep.f = &eepParams.DACUScales[0]}},
-    {.SubCh = 201, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACUScales[1], .eep.f = &eepParams.DACUScales[1]}},
-    {.SubCh = 202, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[0], .eep.f = &eepParams.DACIScales[0]}},
-    {.SubCh = 203, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[1], .eep.f = &eepParams.DACIScales[1]}},
-    {.SubCh = 204, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[2], .eep.f = &eepParams.DACIScales[2]}},
-    {.SubCh = 205, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[3], .eep.f = &eepParams.DACIScales[3]}},
-    {.SubCh = 210, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUScales[0], .eep.f = &eepParams.ADCUScales[0]}},
-    {.SubCh = 211, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUScales[1], .eep.f = &eepParams.ADCUScales[1]}},
-    {.SubCh = 212, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[0], .eep.f = &eepParams.ADCIScales[0]}},
-    {.SubCh = 213, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[1], .eep.f = &eepParams.ADCIScales[1]}},
-    {.SubCh = 214, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[2], .eep.f = &eepParams.ADCIScales[2]}},
-    {.SubCh = 215, .rw = 1, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[3], .eep.f = &eepParams.ADCIScales[3]}},
-    {.SubCh = 233, .rw = 0, .fct = 0, .type = PARAM_DOUBLE, .scale = SCALE_TEMP, .u.s = {.ram.f = &Temperature}},
-    {.SubCh = 251, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.u = &ErrCount, .eep.u = (uint16_t*)-1}},
+    {.SubCh = 200, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACUScales[0], .eep.f = &eepParams.DACUScales[0]}},
+    {.SubCh = 201, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACUScales[1], .eep.f = &eepParams.DACUScales[1]}},
+    {.SubCh = 202, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[0], .eep.f = &eepParams.DACIScales[0]}},
+    {.SubCh = 203, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[1], .eep.f = &eepParams.DACIScales[1]}},
+    {.SubCh = 204, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[2], .eep.f = &eepParams.DACIScales[2]}},
+    {.SubCh = 205, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.DACIScales[3], .eep.f = &eepParams.DACIScales[3]}},
+    {.SubCh = 210, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUScales[0], .eep.f = &eepParams.ADCUScales[0]}},
+    {.SubCh = 211, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCUScales[1], .eep.f = &eepParams.ADCUScales[1]}},
+    {.SubCh = 212, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[0], .eep.f = &eepParams.ADCIScales[0]}},
+    {.SubCh = 213, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[1], .eep.f = &eepParams.ADCIScales[1]}},
+    {.SubCh = 214, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[2], .eep.f = &eepParams.ADCIScales[2]}},
+    {.SubCh = 215, .rw = 1, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.s = {.ram.f = &Params.ADCIScales[3], .eep.f = &eepParams.ADCIScales[3]}},
+    {.SubCh = 233, .rw = 0, .fct = 0, .type = PARAM_FLOAT,  .scale = SCALE_TEMP, .u.s = {.ram.f = &Temperature}},
+    {.SubCh = 251, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.u = &g_ucErrCount, .eep.u = (uint16_t*)-1}},
     {.SubCh = 252, .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &Params.SerBaudReg, .eep.b = &eepParams.SerBaudReg}},
     {.SubCh = 253, .rw = 0, .fct = 2, .type = PARAM_STR,    .scale = SCALE_NONE, .u.doFunction=ReturnInput},
     {.SubCh = 254, .rw = 0, .fct = 0, .type = PARAM_STR,    .scale = SCALE_NONE, .u.s = {.ram.s = VersStrLong}}
@@ -316,7 +316,7 @@ void ParseGetParam(uint8_t SubCh)
     uint8_t fract_len = 4;
     union
     {
-        double f;
+        float f;
         int32_t l;
         int16_t i;
         uint16_t u;
@@ -349,7 +349,7 @@ void ParseGetParam(uint8_t SubCh)
         // get function
         switch (ParamData.type)
         {
-            case PARAM_DOUBLE:
+            case PARAM_FLOAT:
                 Data.f = ParamData.u.get_f_Function();
                 break;
 
@@ -376,7 +376,7 @@ void ParseGetParam(uint8_t SubCh)
         // variable
         switch(ParamData.type)
         {
-            case PARAM_DOUBLE:
+            case PARAM_FLOAT:
                 Data.f = *ParamData.u.s.ram.f;
                 break;
 
@@ -399,7 +399,7 @@ void ParseGetParam(uint8_t SubCh)
     }
 
     // handle scaling of float variables
-    if (ParamData.type == PARAM_DOUBLE)
+    if (ParamData.type == PARAM_FLOAT)
     {
         switch (ParamData.scale)
         {
@@ -431,26 +431,26 @@ void ParseGetParam(uint8_t SubCh)
     // print the parameters
     switch(ParamData.type)
     {
-        case PARAM_DOUBLE:
+        case PARAM_FLOAT:
             // create a format string, because avrgcc doesn't handle a variable length format specifier like this "%.*f"
             sprintf_P(fmt, PSTR("#%%d:%%d=%%.%df\n"), fract_len);
-            printf(fmt, SlaveCh, SubCh, Data.f);
+            printf(fmt, g_ucSlaveCh, SubCh, Data.f);
             break;
 
         case PARAM_INT:
-            printf_P(PSTR("#%d:%d=%d\n"), SlaveCh, SubCh, Data.i);
+            printf_P(PSTR("#%d:%d=%d\n"), g_ucSlaveCh, SubCh, Data.i);
             break;
 
         case PARAM_UINT16:
-            printf_P(PSTR("#%d:%d=%u\n"), SlaveCh, SubCh, Data.u);
+            printf_P(PSTR("#%d:%d=%u\n"), g_ucSlaveCh, SubCh, Data.u);
             break;
 
         case PARAM_BYTE:
-            printf_P(PSTR("#%d:%d=%u\n"), SlaveCh, SubCh, Data.b);
+            printf_P(PSTR("#%d:%d=%u\n"), g_ucSlaveCh, SubCh, Data.b);
             break;
 
         case PARAM_STR:
-            printf_P(PSTR("#%d:%d=%s\n"), SlaveCh, SubCh, Data.s);
+            printf_P(PSTR("#%d:%d=%s\n"), g_ucSlaveCh, SubCh, Data.s);
             break;
 
     }
@@ -459,7 +459,7 @@ void ParseGetParam(uint8_t SubCh)
 
 //---------------------------------------------------------------------------------------------
 
-void ParseSetParam(uint8_t SubCh, double Param)
+void ParseSetParam(uint8_t SubCh, float Param)
 {
     uint8_t tmpActiveParamSet = ActiveParamSet;
     uint8_t tmpwStartParamSet = wStartParamSet;
@@ -495,7 +495,7 @@ void ParseSetParam(uint8_t SubCh, double Param)
 
         switch(Data.type)
         {
-            case PARAM_DOUBLE:
+            case PARAM_FLOAT:
                 switch(Data.scale)
                 {
                     case SCALE_PROZ:
@@ -528,13 +528,13 @@ void ParseSetParam(uint8_t SubCh, double Param)
 
         }
 
-        if (Data.u.s.eep.f != (double*)-1)
+        if (Data.u.s.eep.f != (float*)-1)
         {
             uint8_t size;
             switch(Data.type)
             {
-                case PARAM_DOUBLE:
-                    size = sizeof(double);
+                case PARAM_FLOAT:
+                    size = sizeof(float);
                     break;
 
                 case PARAM_BYTE:
@@ -602,7 +602,7 @@ void ParseSetParam(uint8_t SubCh, double Param)
 
         else if ( (SubCh == 186) && (ArbUpdateMode == 1) )  // store Arbitrary Data to RAM Voltage array.
         {
-            LIMIT_DOUBLE(&ArbRAMtmpV, 0.0, 1.0);
+            LIMIT_FLOAT(&ArbRAMtmpV, 0.0, 1.0);
             ArbV_RAM[ArbIndex] = ArbRAMtmpV;
             ArbIndicator = 1;                               // indicator, that voltage value has been written to RAM
         }

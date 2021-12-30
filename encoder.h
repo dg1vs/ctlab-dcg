@@ -22,8 +22,8 @@
 
 #include <inttypes.h>
 
-void jobEncoder(void);
-int8_t GetEncoderPos(uint8_t);
-int8_t GetAndResetEncPos(void);
+void Encoder_MainFunction(void);
+int8_t Encoder_GetPosition(uint8_t);
+int8_t Encoder_GetAndResetPosition(void);
 
 #endif
