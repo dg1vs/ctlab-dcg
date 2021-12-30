@@ -57,7 +57,7 @@ void InitTimer(void)
     TCNT0 = 0;
     TCCR0 = (1<<WGM01)|(1<<CS01);
     TIMSK = (1<<OCIE0);
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
     OCR0A = (F_CPU / 80000UL) - 1;
     OCR0B = 0;
     TCNT0 = 0;
@@ -83,7 +83,7 @@ void InitTimer(void)
     TCCR2 = (1<<WGM21)|(1<<CS21)|(1<<CS20);
     TIMSK |= (1<<OCF2);
 #endif
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__)  || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)|| defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__)  || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 #if (F_CPU > 16000000UL)
     // initialize Timer 2, period 500us, prescaler 64, CTC mode, more than 16MHz
     OCR2A = (F_CPU / 128000UL) - 1;
@@ -116,7 +116,7 @@ void InitTimer(void)
 
 #if defined(__AVR_ATmega32__)
 ISR(TIMER0_COMP_vect)
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 ISR(TIMER0_COMPA_vect)
 #else
 #error Please define your TIMER0 code
@@ -127,9 +127,11 @@ ISR(TIMER0_COMPA_vect)
 
 
 
+
+
 #if defined(__AVR_ATmega32__)
 ISR(TIMER2_COMP_vect)
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)|| defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
 ISR(TIMER2_COMPA_vect)
 #else
 #error Please define your TIMER2 code
@@ -192,7 +194,7 @@ ISR(TIMER2_COMPA_vect)
     // Interrupts freigeben
 #if defined(__AVR_ATmega32__)
     TIMSK &= ~(1<<OCF2);
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
     TIMSK2 &= ~(1<<OCIE2A);
 #else
 #error Please define your TIMER2 code
@@ -780,7 +782,7 @@ ISR(TIMER2_COMPA_vect)
     cli();
 #if defined(__AVR_ATmega32__)
     TIMSK |= (1<<OCF2);
-#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__) || defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega324P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)
     TIMSK2 |= (1<<OCIE2A);
 #else
 #error Please define your TIMER2 code

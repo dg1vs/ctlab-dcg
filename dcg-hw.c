@@ -23,7 +23,7 @@
 
 #include <util/delay.h>
 
-#include "I2CRegister.h"
+#include "i2creg.h"
 
 #define NDEBUG
 #include "debug.h"
@@ -193,7 +193,7 @@ void ShiftOut1257(uint16_t Value)
     PORTB |= (1<<PB4);                  // STRDC high
 }
 
-void ConfigLM75(float Temp)
+void ConfigLM75(double Temp)
 {
     uint8_t data[2];
     uint16_t Temp2;
@@ -202,7 +202,7 @@ void ConfigLM75(float Temp)
 
     // Optionsregister, invertierter Ausgang, fault queue auf max
     data[0] = 0x1c;
-    if (I2CRegister_Read(0x90, 1, 1, data))
+    if (i2c_write_regs(0x90, 1, 1, data))
     {
         DPRINT(PSTR("%s: Couldn't detect a device at address 0x90\n"), __FUNCTION__);
     }
@@ -211,21 +211,21 @@ void ConfigLM75(float Temp)
     // Tos Register,
     data[0] = Temp2 >> 1;
     data[1] = Temp2 << 7;
-    I2CRegister_Read(0x90, 3, 2, data);
+    i2c_write_regs(0x90, 3, 2, data);
 
     // Thyst. Temperatur - 5°C
     Temp2 -= 10;
     data[0] = Temp2 >> 1;
     data[1] = Temp2 << 7;
-    I2CRegister_Read(0x90, 2, 2, data);
+    i2c_write_regs(0x90, 2, 2, data);
 }
 
-float GetLM75Temp(void)
+double GetLM75Temp(void)
 {
     uint8_t data[2] = {0x19, 0x00};     // 25°C
     int16_t tmp;
 
-    I2CRegister_Read(0x90, 0, 2, data);
+    i2c_read_regs(0x90, 0, 2, data);
     tmp = (data[0] << 1) | (data[1] >> 7);
     if (tmp & 0x100)
     {

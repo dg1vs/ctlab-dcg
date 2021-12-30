@@ -26,8 +26,8 @@
 
 #include "dcg.h"
 #include "encoder.h"
-#include "parser.h"
-#include "lcd.h"
+#include "Parser.h"
+#include "Lcd.h"
 #include "config.h"
 
 #define NDEBUG
@@ -210,7 +210,7 @@ uint8_t PanelPrintFault(char *line)
 /// \return uint8_t : high nibble -> position of decimal point
 ///                   low nibble  -> position of the first visible digit
 //---------------------------------------------------------------------------------------------
-uint8_t GetValuePosition(float value, uint8_t mode)
+uint8_t GetValuePosition(double value, uint8_t mode)
 {
 
     /*  value       "position"  expo    display     value in
@@ -454,7 +454,7 @@ void RangeCurrentToString(char* str, uint8_t Range)
     str[8] = 0;
 }
 
-void DoubleToString(char* str, float i, uint8_t mode)
+void DoubleToString(char* str, double i, uint8_t mode)
 {
     char cUnit=0;
     char cUnitHour = ' ';
@@ -550,7 +550,7 @@ void TemperatureToString(char* str, double i)
 void PanelPrintU(uint8_t cursor)
 {
     char line[9];
-    float* dptr;
+    double* dptr;
 
     dptr = &xVoltage;
 
@@ -584,7 +584,7 @@ void PanelPrintU(uint8_t cursor)
 void PanelPrintI(uint8_t cursor)
 {
     char line[9];
-    float* dptr;
+    double* dptr;
 
     if (!PanelPrintFault(line))
     {
@@ -617,7 +617,7 @@ void PanelPrintI(uint8_t cursor)
 }
 
 
-float GetIncrement(int8_t pos)
+double GetIncrement(int8_t pos)
 {
     return pow(10, pos - 6);
 }
@@ -661,8 +661,8 @@ void jobPanel(void)
         static const char *PDisplayString;
         uint8_t OutSubCh=0;
 
-        float *pwValue = &wCurrent;
-        float RoundFactor = 1.0;
+        double *pwValue = &wCurrent;
+        double RoundFactor = 1.0;
         int8_t *pModifyValuePos = &ModifyCurrentPos;
 
         static uint8_t GoSub = 0;
