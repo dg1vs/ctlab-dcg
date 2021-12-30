@@ -17,7 +17,7 @@
  *
  */
 
-// test 01
+// test 02
 
 #ifndef __DCG_H__
 #define __DCG_H__
