@@ -20,9 +20,7 @@
 
 #include <inttypes.h>
 #include <avr/pgmspace.h>
-
 #include <math.h>
-
 
 #include "dcg.h"
 #include "encoder.h"
@@ -33,9 +31,9 @@
 #define NDEBUG
 #include "debug.h"
 
-
 int8_t EncDiff;
 int8_t EncDiffSpeed;
+
 uint8_t Mode;       // Mode = 0: Modification of the set value itself (with ModifyTimer running)
                     // Mode = 0: Display of measured value (in voltage / current mode (without ModifyTimer running)
                     // Mode = 1: Modification of Cursor Position
