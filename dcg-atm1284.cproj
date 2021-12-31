@@ -172,6 +172,12 @@
     <Compile Include="Config\config.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Common\Encoder.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Common\Encoder.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="dcg-hw-asm.S">
       <SubType>compile</SubType>
     </Compile>
@@ -188,12 +194,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="dcg.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="encoder.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="encoder.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="timer.c">
