@@ -27,7 +27,7 @@
 
 #include "timer.h"
 #include "dcg.h"
-#include "encoder.h"
+#include "Encoder.h"
 #include "config.h"
 
 static volatile struct

@@ -36,7 +36,7 @@
 #include "timer.h"
 #include "I2CRegister.h"
 #include "Lcd.h"
-#include "encoder.h"
+#include "Encoder.h"
 #include "dcg.h"
 
 #define NDEBUG
