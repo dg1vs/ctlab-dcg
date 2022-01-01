@@ -108,7 +108,7 @@ typedef struct
     int16_t RippleOn;
     int16_t RippleOff;
     int16_t RippleMod;
-    uint8_t IncRast;
+    uint8_t ucEncoderPrescaler;
     uint8_t SerBaudReg;
     uint8_t TrackChSave;
     float GainPwrIn;

@@ -200,7 +200,7 @@ const PROGMEM PARAMTABLE SetParamTable[] =
     {.SubCh = 54,  .rw = 0, .fct = 1, .type = PARAM_INT,    .scale = SCALE_NONE, .u.get_i_Function = GetADC4},
     {.SubCh = 70,  .rw = 0, .fct = 0, .type = PARAM_UINT16, .scale = SCALE_NONE, .u.s.ram.u = &DACRawU},
     {.SubCh = 71,  .rw = 0, .fct = 0, .type = PARAM_UINT16, .scale = SCALE_NONE, .u.s.ram.u = &DACRawI},
-    {.SubCh = 89,  .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &Params.IncRast, .eep.b = &eepParams.IncRast}},
+    {.SubCh = 89,  .rw = 1, .fct = 0, .type = PARAM_BYTE,   .scale = SCALE_NONE, .u.s = {.ram.b = &Params.ucEncoderPrescaler, .eep.b = &eepParams.ucEncoderPrescaler}},
     {.SubCh = 99,  .rw = 0, .fct = 2, .type = PARAM_FLOAT,  .scale = SCALE_NONE, .u.doFunction = GetAll},
     {.SubCh = 100, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.DACUOffsets[0], .eep.i = &eepParams.DACUOffsets[0]}},
     {.SubCh = 101, .rw = 1, .fct = 0, .type = PARAM_INT,    .scale = SCALE_NONE, .u.s = {.ram.i = &Params.DACUOffsets[1], .eep.i = &eepParams.DACUOffsets[1]}},
