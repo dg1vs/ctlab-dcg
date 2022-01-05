@@ -20,7 +20,7 @@
 
 #include "avr/io.h"
 #include "avr/interrupt.h"
-#include "config.h"
+#include "Config.h"
 
 .global ShiftIn1864
 .func ShiftIn1864

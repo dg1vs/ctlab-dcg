@@ -20,6 +20,11 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+// Please keep in mind, this file will also included in the dcg-hw-asm.S file.
+// So keep this file simple, otherwise strange error can occur 
+
+
+
 // ******************************************************************************************************************
 // *** user configurable parameters *********************************************************************************
 // ******************************************************************************************************************

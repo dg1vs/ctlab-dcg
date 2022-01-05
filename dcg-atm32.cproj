@@ -169,7 +169,13 @@
     <Compile Include="Common\Uart.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Config\config.h">
+    <Compile Include="Config\Config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Config\Config_LcdChar.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Config\Config_LcdChar.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="dcg-hw-asm.S">
