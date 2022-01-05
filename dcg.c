@@ -1446,8 +1446,11 @@ int main(void)
     // printf auf UART verbiegen
     stdout = &mystdout;
 
-
-    // Bootstring on LCD
+	//parameter available
+	Encoder_Init(Params.ucEncoderPrescaler);
+	Encoder_SetAcceleration(16,8,4,1);
+    
+	// Bootstring on LCD
     char s[9];
 
     Lcd_Write_P(0, 0, strlen_P(VersStrShort_P), VersStrShort_P);
